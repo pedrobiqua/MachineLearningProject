@@ -25,7 +25,7 @@ from sklearn.model_selection import GridSearchCV
 # # -------------------------
 # # Path do dataset para ser avaliado nos modelos
 # # -------------------------
-PATH = "/home/pedro/projects/ml_experimentos/features_csv"
+PATH = "/home/pedro/Projetos/MachineLearningProject"
 TRAIN = PATH + "/train_features_hog.csv"
 TEST = PATH + "/test_features_hog.csv"
 
@@ -91,52 +91,52 @@ def save_confusion_matrix(cm, path_output_file):
 
 
 models_and_parameters = [
-    # {
-    #     "name": "LogisticRegression",
-    #     "model": LogisticRegression(max_iter=1000),
-    #     "params": {
-    #         "C": [0.01, 0.1, 1, 10]
-    #     }
-    # },
-    #
-    # {
-    #     "name": "KNN",
-    #     "model": KNeighborsClassifier(),
-    #     "params": {
-    #         "n_neighbors": [3, 5, 7, 9]
-    #     }
-    # },
-    # {
-    #     "name": "SVM",
-    #     "model": SVC(),
-    #     "params": {
-    #         "C": [0.1, 1, 10],
-    #         "kernel": ["rbf", "linear"]
-    #     }
-    # },
-    # {
-    #     "name": "MLP",
-    #     "model": MLPClassifier(max_iter=1000),
-    #     "params": {
-    #         "hidden_layer_sizes": [(50,), (50, 50)],
-    #         "alpha": [0.0001, 0.001]
-    #     }
-    # },
-    # {
-    #     "name": "RandomForest",
-    #     "model": RandomForestClassifier(),
-    #     "params": {
-    #         "n_estimators": [100, 200],
-    #         "max_depth": [None, 5, 10]
-    #     }
-    # },
-    # {
-    #     "name": "DecisionTree",
-    #     "model": DecisionTreeClassifier(),
-    #     "params": {
-    #         "max_depth": [None, 5, 10]
-    #     }
-    # },
+    {
+        "name": "LogisticRegression",
+        "model": LogisticRegression(max_iter=1000),
+        "params": {
+            "C": [0.01, 0.1, 1, 10]
+        }
+    },
+
+    {
+        "name": "KNN",
+        "model": KNeighborsClassifier(),
+        "params": {
+            "n_neighbors": [3, 5, 7, 9]
+        }
+    },
+    {
+        "name": "SVM",
+        "model": SVC(),
+        "params": {
+            "C": [0.1, 1, 10],
+            "kernel": ["rbf", "linear"]
+        }
+    },
+    {
+        "name": "MLP",
+        "model": MLPClassifier(max_iter=1000),
+        "params": {
+            "hidden_layer_sizes": [(50,), (50, 50)],
+            "alpha": [0.0001, 0.001]
+        }
+    },
+    {
+        "name": "RandomForest",
+        "model": RandomForestClassifier(),
+        "params": {
+            "n_estimators": [100, 200],
+            "max_depth": [None, 5, 10]
+        }
+    },
+    {
+        "name": "DecisionTree",
+        "model": DecisionTreeClassifier(),
+        "params": {
+            "max_depth": [None, 5, 10]
+        }
+    },
     {
         "name": "NaiveBayes",
         "model": GaussianNB(),
