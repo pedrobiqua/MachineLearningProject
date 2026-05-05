@@ -4,6 +4,7 @@ from skimage.color import rgb2gray
 import csv
 import numpy as np
 import os
+import json
 
 #### Organização dos datasets
 DATA_DIR = "/home/pedro/Datasets/FER"
@@ -13,6 +14,9 @@ TEST_DIR = os.path.join(DATA_DIR, "test")
 OUTPUT_DIR = "features_csv"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 SEED = 24
+
+with open("classes_fer.json", "r") as f:
+    label_map = json.load(f)
 
 def extract_features(dataset_path):
     features = []
@@ -42,7 +46,7 @@ def extract_features(dataset_path):
             )
 
             features.append(feat)
-            labels.append(label)
+            labels.append(label_map[label])
 
     return np.vstack(features), np.hstack(labels)
 

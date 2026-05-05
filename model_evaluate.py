@@ -7,6 +7,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 
 from sklearn.pipeline import Pipeline
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
 ### Modelos que serão avaliados
 from sklearn.neural_network import MLPClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
@@ -22,9 +25,9 @@ from sklearn.model_selection import GridSearchCV
 # # -------------------------
 # # Path do dataset para ser avaliado nos modelos
 # # -------------------------
-PATH = "/home/pedro/Datasets/FER"
-TRAIN = PATH + "/train_features_model.csv"
-TEST = PATH + "/test_features_model.csv"
+PATH = "/home/pedro/projects/ml_experimentos/features_csv"
+TRAIN = PATH + "/train_features_hog.csv"
+TEST = PATH + "/test_features_hog.csv"
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
     pipeline = Pipeline([
@@ -61,6 +64,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
 
     y_pred = best_model.predict(X_test)
     report = classification_report(y_test, y_pred)
+    cm = confusion_matrix(y_test, y_pred, normalize='true')
 
     result_text = ""
     result_text += "Parâmetros:\n"
@@ -72,7 +76,18 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
     result_text += "Reports:\n"
     result_text += report + "\n"
 
-    return result_text
+    return result_text, cm
+
+def save_confusion_matrix(cm, path_output_file):
+    plt.figure(figsize=(6, 5))
+    sns.heatmap(cm, annot=True, fmt='.2f', cmap='Blues')
+
+    plt.xlabel("Predito")
+    plt.ylabel("Real")
+
+    plt.tight_layout()
+    plt.savefig(f"{path_output_file}_confusion_matrix.png", dpi=300)
+    plt.close()
 
 
 models_and_parameters = [
@@ -115,30 +130,30 @@ models_and_parameters = [
     #         "max_depth": [None, 5, 10]
     #     }
     # },
-    {
-        "name": "DecisionTree",
-        "model": DecisionTreeClassifier(),
-        "params": {
-            "max_depth": [None, 5, 10]
-        }
-    },
     # {
-    #     "name": "NaiveBayes",
-    #     "model": GaussianNB(),
+    #     "name": "DecisionTree",
+    #     "model": DecisionTreeClassifier(),
     #     "params": {
-    #         # vazio mesmo
+    #         "max_depth": [None, 5, 10]
     #     }
     # },
-    # {
-    #     "name": "LDA",
-    #     "model": LinearDiscriminantAnalysis(),
-    #     "params": {
-    #         # vazio mesmo
-    #     }
-    # }
+    {
+        "name": "NaiveBayes",
+        "model": GaussianNB(),
+        "params": {
+            # vazio mesmo
+        }
+    },
+    {
+        "name": "LDA",
+        "model": LinearDiscriminantAnalysis(),
+        "params": {
+            # vazio mesmo
+        }
+    }
 ]
 
-DATASET = TRAIN.split("/")[-1]
+DATASET = TRAIN.split("/")[-1].replace(".csv", "")
 
 # Carregar dados
 X_train = pd.read_csv(TRAIN)
@@ -157,13 +172,15 @@ print(f"{DATASET}\n")
 for item in models_and_parameters:
     print("\nMODELO:", item["name"])
 
-    result_text = train_and_evaluate(
+    result_text, cm = train_and_evaluate(
         X_train, y_train,
         X_test, y_test,
         item["model"],
         item["params"]
     )
 
-    file_path = os.path.join(OUTPUT_DIR, f"{item['name']}.txt")
+    file_path = os.path.join(OUTPUT_DIR, f"{item['name']}_{DATASET}.txt")
     with open(file_path, "w") as f:
         f.write(result_text)
+
+    save_confusion_matrix(cm, path_output_file=f"{OUTPUT_DIR}/{item['name']}_{DATASET}")
