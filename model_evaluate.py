@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, \
@@ -25,15 +26,38 @@ from sklearn.model_selection import GridSearchCV
 # # -------------------------
 # # Path do dataset para ser avaliado nos modelos
 # # -------------------------
-PATH = "/home/pedro/Projetos/MachineLearningProject"
-TRAIN = PATH + "/train_features_hog.csv"
-TEST = PATH + "/test_features_hog.csv"
+
+### TROCAR APENAS AQUI
+EXTRACTION_TYPE = "RESNET" # RESNET | HOG
+WITH_PCA = True
+
+if EXTRACTION_TYPE == "HOG":
+    PATH = "/home/pedro/Projetos/MachineLearningProject/features_csv"
+    TRAIN = PATH + "/train_features_hog.csv"
+    TEST = PATH + "/test_features_hog.csv"
+elif EXTRACTION_TYPE == "RESNET":
+    PATH = "/home/pedro/Datasets/FER"
+    TRAIN = PATH + "/train_features_model.csv"
+    TEST = PATH + "/test_features_model.csv"
+else:
+    os._exit(0)
 
 def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
-    pipeline = Pipeline([
-        ('scaler', StandardScaler()),
-        ('model', model)
-    ])
+
+    if WITH_PCA:
+        pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('pca', PCA(n_components=100)),
+            ('model', model)
+        ])
+    else:
+        pipeline = Pipeline([
+            ('scaler', StandardScaler()),
+            ('model', model)
+        ])
+
+    print(f"Modelo usado no experimento: {pipeline}")
+
     param_grid = {
         f"model__{key}": value for key, value in param_grid.items()
     }
@@ -98,7 +122,6 @@ models_and_parameters = [
             "C": [0.01, 0.1, 1, 10]
         }
     },
-
     {
         "name": "KNN",
         "model": KNeighborsClassifier(),
@@ -111,7 +134,7 @@ models_and_parameters = [
         "model": SVC(),
         "params": {
             "C": [0.1, 1, 10],
-            "kernel": ["rbf", "linear"]
+            "kernel": ["rbf"]
         }
     },
     {
@@ -166,8 +189,8 @@ X_test = X_test.drop('label', axis=1)
 
 OUTPUT_DIR = "results"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
-print("TESTE DE CLASSIFICADORES")
-print(f"{DATASET}\n")
+print("TESTE DE CLASSIFICADORES FER")
+print(f"CONFIGS:\n Tipo de extração: {EXTRACTION_TYPE} | PCA: {WITH_PCA}")
 
 for item in models_and_parameters:
     print("\nMODELO:", item["name"])
@@ -179,8 +202,13 @@ for item in models_and_parameters:
         item["params"]
     )
 
-    file_path = os.path.join(OUTPUT_DIR, f"{item['name']}_{DATASET}.txt")
+    if WITH_PCA:
+        name = f"{item['name']}_{EXTRACTION_TYPE}_PCA"
+    else:
+        name = f"{item['name']}_{EXTRACTION_TYPE}"
+
+    file_path = os.path.join(OUTPUT_DIR, f"{name}.txt")
     with open(file_path, "w") as f:
         f.write(result_text)
 
-    save_confusion_matrix(cm, path_output_file=f"{OUTPUT_DIR}/{item['name']}_{DATASET}")
+    save_confusion_matrix(cm, path_output_file=f"{OUTPUT_DIR}/{name}")
