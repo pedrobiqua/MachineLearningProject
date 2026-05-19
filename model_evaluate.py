@@ -27,8 +27,8 @@ from sklearn.model_selection import GridSearchCV
 # # -------------------------
 
 ### TROCAR APENAS AQUI
-EXTRACTION_TYPE = "RESNET" # RESNET | HOG
-WITH_PCA = True
+EXTRACTION_TYPE = "HOG" # RESNET | HOG
+WITH_PCA = False
 n_components = 100
 
 if EXTRACTION_TYPE == "HOG":
@@ -114,7 +114,15 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
     result_text += "Reports:\n"
     result_text += report + "\n"
 
-    return result_text, cm
+    metrics = {
+        "model": model.__class__.__name__,
+        "best_params": str(grid.best_params_),
+        "f1_macro": f1_macro,
+        "f1_weighted": f1_weighted,
+        "kappa": kappa
+    }
+
+    return metrics, result_text, cm
 
 def save_confusion_matrix(cm, path_output_file):
     plt.figure(figsize=(6, 5))
@@ -206,10 +214,12 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 print("TESTE DE CLASSIFICADORES FER")
 print(f"CONFIGS:\n Tipo de extração: {EXTRACTION_TYPE} | PCA: {WITH_PCA}")
 
+experiment_results = []
+
 for item in models_and_parameters:
     print("\nMODELO:", item["name"])
 
-    result_text, cm = train_and_evaluate(
+    metrics_dict, result_text, cm = train_and_evaluate(
         X_train, y_train,
         X_test, y_test,
         item["model"],
@@ -226,3 +236,22 @@ for item in models_and_parameters:
         f.write(result_text)
 
     save_confusion_matrix(cm, path_output_file=f"{OUTPUT_DIR}/{name}")
+    experiment_results.append(metrics_dict)
+
+results_df = pd.DataFrame(experiment_results)
+results_df = results_df.sort_values(
+    by="test_f1_macro",
+    ascending=False
+)
+
+results_df = results_df.round(4)
+
+summary_path = os.path.join(
+    OUTPUT_DIR,
+    f"summary_{EXTRACTION_TYPE}_{f'PCA_{n_components}' if WITH_PCA else 'NO_PCA'}.csv"
+)
+
+results_df.to_csv(summary_path, index=False)
+
+print("\nResumo dos experimentos:")
+print(results_df)
