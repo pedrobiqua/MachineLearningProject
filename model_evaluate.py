@@ -29,6 +29,7 @@ from sklearn.model_selection import GridSearchCV
 ### TROCAR APENAS AQUI
 EXTRACTION_TYPE = "RESNET" # RESNET | HOG
 WITH_PCA = True
+n_components = 100
 
 if EXTRACTION_TYPE == "HOG":
     PATH = "/home/pedro/Projetos/MachineLearningProject/features_csv"
@@ -46,7 +47,7 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
     if WITH_PCA:
         pipeline = Pipeline([
             ('scaler', StandardScaler()),
-            ('pca', PCA(n_components=100)),
+            ('pca', PCA(n_components=n_components)),
             ('model', model)
         ])
     else:
@@ -91,6 +92,8 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
 
     # Métrica Kappa
     kappa = cohen_kappa_score(y_test, y_pred)
+    f1_macro = f1_score(y_test, y_pred, average='macro')
+    f1_weighted = f1_score(y_test, y_pred, average='weighted')
 
     result_text = ""
     result_text += "Parâmetros:\n"
@@ -101,6 +104,12 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
 
     result_text += "Kappa:\n"
     result_text += str(kappa) + "\n\n"
+
+    result_text += "F1 Macro:\n"
+    result_text += str(f1_macro) + "\n\n"
+
+    result_text += "F1 Weighted:\n"
+    result_text += str(f1_weighted) + "\n\n"
 
     result_text += "Reports:\n"
     result_text += report + "\n"
