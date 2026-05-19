@@ -239,11 +239,6 @@ for item in models_and_parameters:
     experiment_results.append(metrics_dict)
 
 results_df = pd.DataFrame(experiment_results)
-results_df = results_df.sort_values(
-    by="test_f1_macro",
-    ascending=False
-)
-
 results_df = results_df.round(4)
 
 summary_path = os.path.join(
