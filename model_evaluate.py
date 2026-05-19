@@ -3,8 +3,7 @@ import pandas as pd
 from sklearn.decomposition import PCA
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, \
-    classification_report
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report, cohen_kappa_score
 
 from sklearn.pipeline import Pipeline
 
@@ -90,12 +89,18 @@ def train_and_evaluate(X_train, y_train, X_test, y_test, model, param_grid):
     report = classification_report(y_test, y_pred)
     cm = confusion_matrix(y_test, y_pred, normalize='true')
 
+    # Métrica Kappa
+    kappa = cohen_kappa_score(y_test, y_pred)
+
     result_text = ""
     result_text += "Parâmetros:\n"
     result_text += str(grid.best_params_) + "\n\n"
 
     result_text += "Score médio (CV):\n"
     result_text += str(grid.best_score_) + "\n\n"
+
+    result_text += "Kappa:\n"
+    result_text += str(kappa) + "\n\n"
 
     result_text += "Reports:\n"
     result_text += report + "\n"
